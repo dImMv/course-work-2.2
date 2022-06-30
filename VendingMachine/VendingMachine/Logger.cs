@@ -1,4 +1,4 @@
-﻿namespace CourseWork
+﻿namespace VendingMachine
 {
     public class Logger
     {
@@ -9,14 +9,19 @@
             _logType = logType;
         }
 
-        public void Log(string message)
+        public void LogError(string errorMessage)
         {
-            _logType.Log(message);
+            _logType.LogError(errorMessage);
         }
 
-        public void Log(string message, string location)
+        public void LogWarning(string warningMessage)
         {
-            _logType.Log(message, location);
+            _logType.LogWarning(warningMessage);
+        }
+
+        public void LogInfo(string infoMessage)
+        {
+            _logType.LogInfo(infoMessage);
         }
     }
 }

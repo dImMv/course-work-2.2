@@ -4,14 +4,37 @@ namespace CourseWork
 {
     public class AuditLog : ILogType
     {
-        public void Log(string message)
+        private readonly ConsoleColor _defaultColor;
+
+        public AuditLog()
         {
-            Console.WriteLine($"{message} [{DateTime.Now}]");
+            _defaultColor = Console.ForegroundColor;
         }
 
-        public void Log(string message, string location)
+        public void LogError(string errorMessage)
         {
-            Console.WriteLine($"{location}: {message} [{DateTime.Now}]");
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine($"Error: {errorMessage} [{DateTime.Now}]");
+            ResetForegroundColor();
+        }
+
+        public void LogWarning(string warningMessage)
+        {
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine($"Warning: {warningMessage} [{DateTime.Now}]");
+            ResetForegroundColor();
+        }
+
+        public void LogInfo(string infoMessage)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine($"Info: {infoMessage} [{DateTime.Now}]");
+            ResetForegroundColor();
+        }
+
+        private void ResetForegroundColor()
+        {
+            Console.ForegroundColor = _defaultColor;
         }
     }
 }

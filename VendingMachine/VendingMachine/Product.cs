@@ -1,8 +1,8 @@
 ﻿
 
-namespace CourseWork
+namespace VendingMachine
 {
-    internal interface IProduct
+    public interface IProduct
     {
 
 
