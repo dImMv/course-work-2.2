@@ -1,5 +1,5 @@
 ﻿using System;
-using CourseWork;
+using VendingMachine.Patterns.StrategyLogger;
 
 namespace VendingMachine.Patterns.AbstractFactory
 {

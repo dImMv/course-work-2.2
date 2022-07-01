@@ -1,8 +1,8 @@
-﻿using CourseWork;
+﻿
 
 namespace VendingMachine.Patterns.AbstractFactory
 {
-    internal interface IVendingMachineFactory
+    public interface IVendingMachineFactory
     {
         IAbstractNoodle CreateNoodle();
         IAbstractFizzyDrink CreateFizzyDrink();

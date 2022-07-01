@@ -1,4 +1,4 @@
-﻿namespace VendingMachine
+﻿namespace VendingMachine.Patterns.StrategyLogger
 {
     public class Logger
     {

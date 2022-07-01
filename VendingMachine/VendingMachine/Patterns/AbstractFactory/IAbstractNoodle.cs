@@ -1,4 +1,4 @@
-﻿namespace VendingMachine
+﻿namespace VendingMachine.Patterns.AbstractFactory
 {
     public interface IAbstractNoodle : IProduct
     {

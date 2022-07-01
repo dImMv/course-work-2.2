@@ -1,269 +1,229 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Reflection.Metadata.Ecma335;
-using CourseWork;
-using VendingMachine.Patterns.AbstractFactory;
 
 namespace VendingMachine
 {
-    public interface IAbstractNoodle : IProduct
+
+    // The Handler interface declares a method for building the chain of
+    // handlers. It also declares a method for executing a request.
+    public interface IHandler
     {
-        string GetInformation();
-        string GetSticks();
-        public IAbstractNoodle DeepCopy();
+        IHandler SetNext(IHandler handler);
+
+        object Handle(int requestPrice, int requestAmount);
     }
 
-    public class KoreanNoodle :  IAbstractNoodle 
+    // The default chaining behavior can be implemented inside a base handler
+    // class.
+    abstract class AbstractHandler : IHandler
     {
-        public string Name { get; set; }
-        public string Type { get; set; }
-        public int Price { get; set; }
+        private IHandler _nextHandler;
 
-        public KoreanNoodle(string name, int price)
+        private AbstractHandler[] _handlers;
+
+        public IHandler SetNext(IHandler handler)
         {
-            Name = name;
-            Price = price;
-            Type = "Korean_Noodle";
-        }
-        
-        public virtual string GetInformation()
-        {
-            return $"The Korean noodle {Name} costs {Price}";
+            this._nextHandler = handler;
+            return handler;
         }
 
-        public virtual string GetSticks()
+        public virtual object Handle(int requestPrice, int requestAmount)
         {
-            return "Take your metal sticks from bottom";
-        }
-
-        public IAbstractNoodle DeepCopy()
-        {
-            var clone = (IAbstractNoodle)this.MemberwiseClone();
-            clone.Name = Name;
-            clone.Type = Type;
-            clone.Price = Price;
-            return clone;
-        }
-    }
-
-
-    public class UsFizzyDrink :  IAbstractFizzyDrink
-    {
-
-        private readonly Logger _logger;
-        public string Name { get; set; }
-        public string Type { get; set; }
-        public int Price { get; set; }
-
-        public UsFizzyDrink(string name, int price)
-        {
-            Name = name;
-            Price = price;
-            Type = "US_Fizzy_Drink";
-            _logger = new Logger(new AuditLog());
-        }
-
-        public string GetInformation()
-        {
-            return $"The US fizzy drink {Name} costs {Price}";
-        }
-
-        public IAbstractFizzyDrink DeepCopy()
-        {
-            try
+            if (_nextHandler != null)
             {
-                var clone = (IAbstractFizzyDrink) MemberwiseClone();
-                clone.Name = Name;
-                clone.Type = Type;
-                clone.Price = Price;
-
-                return clone;
+                return _nextHandler.Handle(requestPrice, requestAmount);
             }
-            catch (Exception e)
+            else
             {
-                _logger.LogError(e.Message);
                 return null;
             }
         }
 
-
-    }
-
-
-    public class Client
-    {
-        public void Main()
+        private AbstractHandler[] GetValues()
         {
-            // The client code can work with any concrete factory class.
-            Console.WriteLine("Client: Testing client code with the first factory type...");
-            //ClientMethod(new ConcreteFactory1());
-            Console.WriteLine();
-
-            Console.WriteLine("Client: Testing the same client code with the second factory type...");
-            //ClientMethod(new ConcreteFactory2());
+            _handlers = new AbstractHandler[10];
+            _handlers[0] = null;
+            _handlers[1] = new NoodleHandler();
+            _handlers[2] = new NoodleHandler();
+            _handlers[3] = new NoodleHandler();
+            _handlers[4] = new FizzyDrinkHandler();
+            _handlers[5] = new FizzyDrinkHandler();
+            _handlers[6] = new FizzyDrinkHandler();
+            _handlers[7] = null;
+            _handlers[8] = null;
+            _handlers[9] = null;
+            return _handlers;
         }
 
-        /*public void ClientMethod(IAbstractFactory factory)
+        public List<AbstractHandler> GetChainOfResponsibilities(int[] order)
         {
-            var productA = factory.CreateProductA();
-            var productB = factory.CreateProductB();
-
-            Console.WriteLine(productB.UsefulFunctionB());
-            Console.WriteLine(productB.AnotherUsefulFunctionB(productA));
-        }*/
-    }
-
-
-
-    public interface IBillStrategy
-    {
-
-        public string Get();
-    }
-
-
-    public enum PaymentStatus
-    {
-        Successfully,
-        Canceled
-    }
-
-
-
-    public class PrintBillStrategy : IBillStrategy
-    {
-       
-        public PrintBillStrategy()
-        {
-            
-        }
-
-
-        private void PrintDict()
-        {
-            System.Console.WriteLine("Cash:");
-            foreach (KeyValuePair<int, int> pair in this.bnDict)
+            var basicHandlers = GetValues();
+            var chainOfResponsibilities = new List<AbstractHandler>();
+            for (var i = 0; i < order.Length; i++)
             {
-                if (pair.Value != 0)
-                    System.Console.WriteLine($"{pair.Key}x{pair.Value}");
+                var currentOrder = order[i];
+                if (currentOrder > 9) continue;
+                if (basicHandlers[currentOrder] is null) continue;
+                chainOfResponsibilities.Add(basicHandlers[currentOrder]);
+            }
+
+            for (var i = 0; i < chainOfResponsibilities.Count - 1; i++)
+            {
+                chainOfResponsibilities[i].SetNext(chainOfResponsibilities[i + 1]);
+            }
+            return chainOfResponsibilities;
+
+        }
+
+
+    }
+
+    class FizzyDrinkHandler : AbstractHandler
+    {
+        public override object Handle(int requestPrice, int requestAmount)
+        {
+            if (requestPrice >= 10 && requestAmount != 0)
+            {
+                return $"Noodle Successfully pushed";
+            }
+            else
+            {
+                return base.Handle(requestPrice, requestAmount);
             }
         }
+    }
 
-        public void GiveCash(double amount)
+    class NoodleHandler : AbstractHandler
+    {
+        public override object Handle(int requestPrice, int requestAmount)
         {
-            if (amount < 0)
-                throw new Exception("Amount can not be negative");
-            try
+            if (requestPrice >= 10 && requestAmount != 0)
             {
-                this.handler.GetBankNotes(amount, this.bnDict);
-                this.PrintDict();
-                this.FillDict();
+                return $"Noodle Successfully pushed";
             }
-            catch (Exception)
+            else
             {
-
+                return base.Handle(requestPrice, requestAmount);
             }
         }
+    }
 
-        public PaymentStatus OnPaymentProces()
+
+
+
+
+    class Client
+    {
+        // The client code is usually suited to work with a single handler. In
+        // most cases, it is not even aware that the handler is part of a chain.
+        public static void ClientCode(AbstractHandler handler, string input, List<>)
         {
-            while (true)
+
+            foreach (var food in new List<string> { "Nut", "Banana", "Cup of coffee" })
             {
-                Console.WriteLine("Enter amount");
-                string amount = Console.ReadLine();
+                Console.WriteLine($"Client: Who wants a {food}?");
 
-                if (amount == "cancel")
-                    return PaymentStatus.Canceled;
+                var result = handler.Handle(food);
 
-                bool isParsed = int.TryParse(amount, out int intAmount);
-
-                if (!isParsed)
+                if (result != null)
                 {
-                    Console.WriteLine("Incorrect entered amount, try again");
-                    continue;
+                    Console.Write($"   {result}");
                 }
                 else
                 {
-                    if (intAmount < IBillStrategy.ticketPrice)
-                    {
-                        Console.WriteLine("Not enough money, try again");
-                        continue;
-                    }
-                    else
-                    {
-                        GiveCash(intAmount - IBillStrategy.ticketPrice);
-                        break;
-                    }
-
+                    Console.WriteLine($"   {food} was left untouched.");
                 }
             }
-            return PaymentStatus.Successfully;
         }
 
-        public string Get()
+        public static List<int> GetOrder()
         {
-            throw new NotImplementedException();
+            Console.WriteLine("Enter your order");
+            var input = Console.ReadLine();
+            if (input is null) return null;
+            var inputArr = input.Split(' ');
+            var order = new List<int>();
+            foreach (var item in inputArr)
+            {
+                var isNum = int.TryParse(item, out var dig);
+                if (!isNum)
+                {
+                    return null;
+                }
+                order.Add(dig);
+            }
+            return order;
         }
     }
 
 
-    public class SmsPaymentStrategy : IBillStrategy
+
+
+
+
+
+    public class Program
     {
-        public PaymentStatus OnPaymentProces()
-        {
-            return GetCardNumber();
-        }
 
-        private PaymentStatus GetCardNumber()
+
+        static void ProcessWork()
         {
-            while (true)
+            bool user;
+            int id;
+            do
             {
-                Console.WriteLine("Enter your card number");
-                string cardNumber = Console.ReadLine();
+                Console.WriteLine("welcome! \nSelect user: 1 - admin 2 - simple user");
+                var userInp = Console.ReadLine();
+                user = int.TryParse(userInp, out id);
+            } while (user);
 
-                if (cardNumber == "cancel")
-                    return PaymentStatus.Canceled;
+            if (id == 1)
+            {
+                do
+                {
+                    try
+                    {
+                        Console.WriteLine("Welcome! \nenter the product you want to add [TYPE] [name] [price] \n" +
+                                          "possible types: USN, KON, USF, KOF");
+                        var userInp = Console.ReadLine()?.Split(' ');
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e);
+                        throw;
+                    }
+                    while
 
-                if (IsValidCardNumber(cardNumber))
-                    return PaymentStatus.Successfully;
-                else
-                    Console.WriteLine("Wrong entered card number, try again");
             }
         }
 
-        private bool IsValidCardNumber(string cardNumber)
-        {
-            return (cardNumber.Trim().Length == 16 && long.TryParse(cardNumber, out long n));
+
+            private static void Main(string[] args)
+            {
+                ProcessWork();
+                // The other part of the client code constructs the actual chain.
+                /*  var monkey = new MonkeyHandler();
+                  var squirrel = new SquirrelHandler();
+                  var dog = new DogHandler();
+
+                  monkey.SetNext(squirrel).SetNext(dog);
+
+                  // The client should be able to send a request to any handler, not
+                  // just the first one in the chain.
+                  Console.WriteLine("Chain: Monkey > Squirrel > Dog\n");
+                  Client.ClientCode(monkey);
+                  Console.WriteLine();
+
+                  Console.WriteLine("Subchain: Squirrel > Dog\n");
+                  Client.ClientCode(squirrel);*/
+
+            }
         }
+
+
+
+
+
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-    internal class Program
-    {
-
-
-
-
-
-        private static void Main(string[] args)
-        {
-            Console.WriteLine("Hello World!");
-        }
-    }
-
-
-
-
-
-}

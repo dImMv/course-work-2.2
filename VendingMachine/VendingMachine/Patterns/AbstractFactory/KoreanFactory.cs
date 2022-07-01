@@ -1,9 +1,14 @@
 ﻿using System;
+using static System.Int32;
 
 namespace VendingMachine.Patterns.AbstractFactory
 {
-    internal class KoreanFactory : IVendingMachineFactory
+    public class KoreanFactory : IVendingMachineFactory
     {
+        public string Owner { get; set; }
+        public int Price { get; set; }
+        public int TouchPoint { get; set; }
+
         public KoreanFactory(string owner, int price, int touchPoint)
         {
             Owner = owner;
@@ -22,7 +27,7 @@ namespace VendingMachine.Patterns.AbstractFactory
             Console.WriteLine("Enter name");
             var name = Console.ReadLine();
             Console.WriteLine("Enter price");
-            int.TryParse(Console.ReadLine(), out var price);
+            TryParse(Console.ReadLine(), out var price);
             var koreanNoodle = new KoreanNoodle(name, price);
             return koreanNoodle;
         }
@@ -38,19 +43,17 @@ namespace VendingMachine.Patterns.AbstractFactory
             Console.WriteLine("Enter name");
             var name = Console.ReadLine();
             Console.WriteLine("Enter price");
-            int.TryParse(Console.ReadLine(), out var price);
+            TryParse(Console.ReadLine(), out var price);
             var koreanFizzyDrink = new KoreanFizzyDrink(name, price);
             return koreanFizzyDrink;
         }
 
-
-        public string Owner { get; set; }
-        public int Price { get; set; }
-        public int TouchPoint { get; set; }
         public string GetVendorInformation()
         {
             return
-                $"This goods offer vendor - {Owner}; \nHis price for delivering one item is - ${Price}; \nThe distance between the vending machine and location is - {TouchPoint}mil";
+                $"This goods offer vendor - {Owner}; " +
+                $"\nHis price for delivering one item is - ${Price}; " +
+                $"\nThe distance between the vending machine and location is - {TouchPoint}mil";
         }
     }
 }

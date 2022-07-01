@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace CourseWork
+namespace VendingMachine.Patterns.StrategyLogger
 {
     public class FileLog : ILogType
     {
