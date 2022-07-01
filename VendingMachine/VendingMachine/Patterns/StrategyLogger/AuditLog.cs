@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace CourseWork
+namespace VendingMachine.Patterns.StrategyLogger
 {
     public class AuditLog : ILogType
     {
